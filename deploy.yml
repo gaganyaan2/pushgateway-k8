@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pushgateway-deployment
+  labels:
+    app: pushgateway
+    env: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pushgateway
+      env: prod
+  template:
+    metadata:
+      labels:
+        app: pushgateway
+        env: prod
+    spec:
+      containers:
+      - name: pushgateway-container
+        image: prom/pushgateway
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        ports:
+        - containerPort: 9091
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pushgateway-service
+  labels:
+    app: pushgateway
+    env: prod
+spec:
+  selector:
+    app: pushgateway
+    env: prod
+  ports:
+  - name: promui
+    protocol: TCP
+    port: 9091
+    targetPort: 9091
+    nodePort: 30008
+  type: NodePort
